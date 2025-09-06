@@ -1,0 +1,23 @@
+# Build
+bin/
+obj/
+out/
+
+# VSCode
+.vscode/
+.vs/
+
+# Usuário
+*.user
+*.suo
+
+# Build outputs
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+# Sistema
+Thumbs.db
+.DS_Store

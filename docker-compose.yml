@@ -1,0 +1,60 @@
+services:
+  api:
+    build: .
+    container_name: data_preprocessing_api
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+      - "5901:5901"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=DataPreprocessing;Username=postgres;Password=postgres
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+
+  db:
+    image: postgres:16
+    container_name: data_preprocessing_db
+    restart: always
+    environment:
+      POSTGRES_DB: DataPreprocessing
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  db-init:
+    image: postgres:16
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "echo 'Aguardando banco...' &&
+              until pg_isready -h db -U postgres; do sleep 1; done &&
+              echo 'Banco pronto!'"
+
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=DataPreprocessing;Username=postgres;Password=postgres
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
