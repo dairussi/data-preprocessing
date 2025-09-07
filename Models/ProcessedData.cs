@@ -1,35 +1,44 @@
-public class ProcessData
+public record ProcessData
 {
-    public int Id { get; private set; }
-    public string? Data { get; private set; }
-    public StatusProcess StatusProcess { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public int PreprocessingScriptStoreId { get; private set; }
-    public string? ErrorMessage { get; private set; }
-    public PreprocessingScriptStore PreprocessingScriptStore { get; private set; } = default!;
+    public int Id { get; init; }               // PK do banco, autogerado
+    public Guid ProcessId { get; init; }       // Identidade conceitual, mesma para versões
+    public string? Data { get; init; }
+    public StatusProcess StatusProcess { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public int PreprocessingScriptStoreId { get; init; }
+    public string? ErrorMessage { get; init; }
+    public PreprocessingScriptStore PreprocessingScriptStore { get; init; } = default!;
 
-    public ProcessData() { }
+    private ProcessData() { }
 
-    public ProcessData(int preprocessingScriptStoreId, StatusProcess statusProcess)
+    public static Result<ProcessData> Create(int preprocessingScriptStoreId, Guid processId, DateTime createdAt) =>
+        Result.Success(new ProcessData
+        {
+            CreatedAt = createdAt,
+            PreprocessingScriptStoreId = preprocessingScriptStoreId,
+            ProcessId = processId,
+            StatusProcess = StatusProcess.InProgress
+        });
+
+    public Result<ProcessData> WithData(string data)
     {
-        CreatedAt = DateTime.UtcNow;
-        PreprocessingScriptStoreId = preprocessingScriptStoreId;
-        StatusProcess = statusProcess;
+        if (string.IsNullOrWhiteSpace(data))
+            return Result.Failure<ProcessData>("O resultado do processamento está vazio");
+
+        return Result.Success(this with
+        {
+            Data = data,
+            StatusProcess = StatusProcess.Completed
+        });
     }
 
-    public void AddDataResult(string data)
-    {
-        Data = data;
-    }
+    public Result<ProcessData> WithError(string errorMessage) =>
+        Result.Success(this with
+        {
+            ErrorMessage = errorMessage,
+            StatusProcess = StatusProcess.Failed
+        });
 
-    public void ModifyProcessing(StatusProcess statusProcess)
-    {
-        StatusProcess = statusProcess;
-    }
-
-    public void AddErrorMessage(string errorMessage)
-    {
-        ErrorMessage = errorMessage;
-    }
-
+    public Result<ProcessData> WithStatus(StatusProcess status) =>
+        Result.Success(this with { StatusProcess = status });
 }

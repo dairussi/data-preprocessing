@@ -70,18 +70,17 @@ Enviar:
 - `scriptName`: nome do script
 - `input`: dados para processar
 
-Retorna: objeto com processId, status, message e createdAt
+Retorna: retorna a primeira versão com status
 
 ### 4. Ver Resultado
 
-**GET** `/process-data?processDataId={id}`
+**GET** `/process-data`
 
-Enviar: ID do processamento
+Enviar: ProcessId
 
 Retorna:
 
-- Status: `InProgress`, `Completed` ou `Failed`
-- Se completo: obejto com resultado do processamento, data, nome do script usado no processamento
+- Todas as versões do objeto com seus referidos status
 
 ### Passo a Passo
 
@@ -107,7 +106,7 @@ Retorna:
 
 4. Como você evoluiria a API para suportar o versionamento de scripts?
 
-   - Como você evoluiria a API para suportar o versionamento de scripts? Criar uma tag no banco com isCurrent para acessar a versao atual do script e evoluir o codigo para fazer essa busca e devolução corretante, tambem o salvamento de versões.
+   - Criar uma tag no banco com isCurrent para acessar a versao atual do script e evoluir o codigo para fazer essa busca e devolução corretante, tambem o salvamento de versões.
 
 5. Que tipo de política de backup de dados você aplicaria neste cenário?
 
@@ -119,4 +118,4 @@ Retorna:
 
 7. Como você enxerga o paradigma funcional beneficiando a solução deste problema?
 
-   - Eu não tenho experiência em programação funcional, mas ao pouco que estudei para efetuar o teste me parece uma abordagem segura para manter dados originais e rastreabilidade dos mesmos, garantido uma boa história contada dos dados sem a necessidade de infinitos logs devido ao possível volume de dados envolvidos.
+   - Embora eu ainda não tenha experiência prática extensa com programação funcional, vejo benefícios claros para esse problema. A imutabilidade garante que os dados originais nunca sejam alterados, facilitando rastreabilidade e auditoria. Além disso, o uso de tipos que representam explicitamente sucesso ou falha, como Result ou Option, permite tratar erros de forma segura sem exceções, tornando o processamento de grandes volumes de dados mais previsível e confiável.

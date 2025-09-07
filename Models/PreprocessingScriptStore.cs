@@ -1,18 +1,26 @@
-public class PreprocessingScriptStore
+public record PreprocessingScriptStore
 {
-    public int Id { get; private set; }
-    public string Name { get; private set; } = string.Empty;
-    public string ScriptContent { get; private set; } = string.Empty;
+    public int Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string ScriptContent { get; init; } = string.Empty;
+    public DateTime CreatedAt { get; init; }
+    public IReadOnlyCollection<ProcessData> ProcessDatas { get; init; } = new List<ProcessData>();
 
-    public DateTime CreatedAt { get; private set; }
-    public List<ProcessData> ProcessDatas { get; private set; } = new();
+    private PreprocessingScriptStore() { }
 
-    public PreprocessingScriptStore() { }
-
-    public PreprocessingScriptStore(string name, string scriptContent)
+    public static Result<PreprocessingScriptStore> Create(string name, string scriptContent, DateTime createdAt)
     {
-        Name = name;
-        ScriptContent = scriptContent;
-        CreatedAt = DateTime.UtcNow;
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure<PreprocessingScriptStore>("Name cannot be empty");
+
+        if (string.IsNullOrWhiteSpace(scriptContent))
+            return Result.Failure<PreprocessingScriptStore>("Script content cannot be empty");
+
+        return Result.Success(new PreprocessingScriptStore
+        {
+            Name = name,
+            ScriptContent = scriptContent,
+            CreatedAt = createdAt
+        });
     }
 }

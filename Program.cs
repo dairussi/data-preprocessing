@@ -57,9 +57,9 @@ app.MapPost("/process-data", async (string scriptName, string input, [FromServic
     return await service.ProcessDataAsync(scriptName, input);
 });
 
-app.MapGet("/process-data", async (int processDataId, [FromServices] IPreprocessingScriptService service) =>
+app.MapGet("/process-data", async (Guid processId, [FromServices] IPreprocessingScriptService service) =>
 {
-    return await service.GetProcessDataById(processDataId);
+    return await service.GetProcessDataByProcessId(processId);
 });
 
 app.Run();
